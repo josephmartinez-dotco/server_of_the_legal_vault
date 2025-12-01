@@ -151,6 +151,9 @@ export const updateDocument = async (docId, docData) => {
     doc_submitted_by,
     doc_reference,
     doc_last_updated_by,
+    is_trashed,
+    doc_trashed_by,
+    doc_trashed_date,
     case_id,
   } = docData;
 
@@ -174,8 +177,11 @@ export const updateDocument = async (docId, docData) => {
       doc_submitted_by = COALESCE($13, doc_submitted_by),
       doc_reference = COALESCE($14::jsonb, doc_reference),
       doc_last_updated_by = COALESCE($15, doc_last_updated_by),
-      case_id = COALESCE($16, case_id)
-    WHERE doc_id = $17
+      doc_trashed_by = COALESCE($16, doc_trashed_by),
+      doc_trashed_date = COALESCE($17, doc_trashed_date),
+      is_trashed = COALESCE($18, is_trashed),
+      case_id = COALESCE($19, case_id)
+    WHERE doc_id = $20
     RETURNING *;
   `;
 
@@ -195,6 +201,9 @@ export const updateDocument = async (docId, docData) => {
     doc_submitted_by,
     doc_reference,
     doc_last_updated_by,
+    doc_trashed_by,
+    doc_trashed_date,
+    is_trashed,
     case_id,
     docId,
   ];

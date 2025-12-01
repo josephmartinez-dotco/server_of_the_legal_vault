@@ -5,11 +5,12 @@ import { query } from "../db.js";
 import bcrypt from "bcrypt";
 const saltRounds = 10;
 
-// Get all documents
-export const getDocuments = async () => {
-  const { rows } = await query(
-    "SELECT * FROM document_tbl ORDER BY doc_id DESC"
-  );
+// Get all documents (optionally include deleted)
+export const getDocuments = async (includeDeleted = true) => {
+  const queryStr = includeDeleted
+    ? "SELECT * FROM document_tbl ORDER BY doc_id DESC"
+    : "SELECT * FROM document_tbl WHERE is_deleted = false OR is_deleted IS NULL ORDER BY doc_id DESC";
+  const { rows } = await query(queryStr);
   return rows;
 };
 
@@ -204,6 +205,33 @@ export const updateDocument = async (docId, docData) => {
 
 // Delete a document
 export const deleteDocument = async (docId) => {
+  const { rows } = await query(
+    "DELETE FROM document_tbl WHERE doc_id = $1 RETURNING *",
+    [docId]
+  );
+  return rows[0];
+};
+
+// Soft delete a document (move to trash)
+export const softDeleteDocument = async (docId, deletedBy) => {
+  const { rows } = await query(
+    `UPDATE document_tbl SET is_deleted = true, deleted_by = $2, deleted_date = NOW() WHERE doc_id = $1 RETURNING *`,
+    [docId, deletedBy]
+  );
+  return rows[0];
+};
+
+// Restore a soft-deleted document
+export const restoreDocument = async (docId) => {
+  const { rows } = await query(
+    `UPDATE document_tbl SET is_deleted = false, deleted_by = NULL, deleted_date = NULL WHERE doc_id = $1 RETURNING *`,
+    [docId]
+  );
+  return rows[0];
+};
+
+// Permanently delete a document
+export const permanentDeleteDocument = async (docId) => {
   const { rows } = await query(
     "DELETE FROM document_tbl WHERE doc_id = $1 RETURNING *",
     [docId]

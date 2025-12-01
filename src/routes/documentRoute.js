@@ -88,7 +88,12 @@ router.put(
   documentController.removeReference
 ); // remove a specific doc_reference file
 
-router.delete("/documents/:id", verifyUser, requireAdmin, documentController.deleteDocument);
+// Soft delete (move to trash)
+router.delete("/documents/:id", verifyUser, documentController.softDeleteDocument);
+// Restore from trash
+router.patch("/documents/:id/restore", verifyUser, documentController.restoreDocument);
+// Permanent delete
+router.delete("/documents/:id/permanent", verifyUser, requireAdmin, documentController.permanentDeleteDocument);
 
 router.get(
   "/documents/search/:query",

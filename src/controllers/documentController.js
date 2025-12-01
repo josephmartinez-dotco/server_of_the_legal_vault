@@ -88,9 +88,8 @@ export const createDocument = async (req, res) => {
     const docData = {
       ...req.body,
       doc_file: mainFile
-        ? `/uploads/${
-            req.body.doc_type === "Tasked" ? "taskedDocs" : "supportingDocs"
-          }/${mainFile}`
+        ? `/uploads/${req.body.doc_type === "Tasked" ? "taskedDocs" : "supportingDocs"
+        }/${mainFile}`
         : null,
       doc_reference: references.length
         ? JSON.stringify(references.map((f) => `/uploads/referenceDocs/${f}`))
@@ -117,9 +116,8 @@ export const updateDocument = async (req, res) => {
     const mainFile = files["doc_file"]?.[0]?.filename || null;
 
     if (mainFile) {
-      body.doc_file = `/uploads/${
-        req.body.doc_type === "Task" ? "taskedDocs" : "supportingDocs"
-      }/${mainFile}`;
+      body.doc_file = `/uploads/${req.body.doc_type === "Task" ? "taskedDocs" : "supportingDocs"
+        }/${mainFile}`;
     }
 
     if (files["doc_reference"] || req.body.doc_reference) {
@@ -185,6 +183,52 @@ export const deleteDocument = async (req, res) => {
     res.status(200).json({ message: "Document deleted successfully" });
   } catch (err) {
     console.error("Error deleting document:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Soft delete (move to trash)
+export const softDeleteDocument = async (req, res) => {
+  const { id } = req.params;
+  const deletedBy = req.user?.user_id || null;
+  try {
+    const deleted = await documentService.softDeleteDocument(id, deletedBy);
+    if (!deleted) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+    res.status(200).json({ message: "Document moved to trash" });
+  } catch (err) {
+    console.error("Error soft deleting document:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Restore document
+export const restoreDocument = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const restored = await documentService.restoreDocument(id);
+    if (!restored) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+    res.status(200).json({ message: "Document restored" });
+  } catch (err) {
+    console.error("Error restoring document:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Permanent delete
+export const permanentDeleteDocument = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deleted = await documentService.permanentDeleteDocument(id);
+    if (!deleted) {
+      return res.status(404).json({ message: "Document not found" });
+    }
+    res.status(200).json({ message: "Document permanently deleted" });
+  } catch (err) {
+    console.error("Error permanently deleting document:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

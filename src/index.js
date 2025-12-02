@@ -45,10 +45,9 @@ app.use("/api", caseTagRoutes);
 // the generic static will serve files and bypass the role middleware.
 app.use(
   "/uploads/taskedDocs",
-  verifyUser,
-  requireAdminOrLawyer,
-  express.static("C:/CAPSTONE_2/uploads/taskedDocs")
-); // tasked document uploads (restricted)
+  verifyUser, // only verified users can access tasked documents
+  express.static("D:/Capstone_ni_Angelie/uploads/taskedDocs")
+);
 app.use(
   "/uploads/supportingDocs",
   verifyUser,

@@ -5,12 +5,15 @@ import { query } from "../db.js";
 import bcrypt from "bcrypt";
 const saltRounds = 10;
 
-// Get all documents (optionally include deleted)
-export const getDocuments = async (includeDeleted = true) => {
-  const queryStr = includeDeleted
-    ? "SELECT * FROM document_tbl ORDER BY doc_id DESC"
-    : "SELECT * FROM document_tbl WHERE is_deleted = false OR is_deleted IS NULL ORDER BY doc_id DESC";
-  const { rows } = await query(queryStr);
+// Get all documents
+export const getDocuments = async () => {
+  const { rows } = await query(
+    `SELECT d.* FROM document_tbl d 
+     JOIN case_tbl c ON d.case_id = c.case_id
+     WHERE c.case_status != 'Archived (Completed)' AND c.case_status != 'Archived (Dismissed)' 
+     AND c.case_status != 'Dismissed' AND c.case_status != 'Completed'
+     ORDER BY doc_id DESC`
+  );
   return rows;
 };
 
@@ -63,8 +66,8 @@ export const getTaskDocumentsByUser = async (userId) => {
         d.doc_tasked_to = $1
         OR d.doc_tasked_by = $1
         OR c.user_id = $1
-        OR c.case_status != 'Dismissed'
       )
+      AND (c.case_status NOT IN ('Archived (Completed)', 'Archived (Dismissed)', 'Completed', 'Dismissed') OR c.case_status IS NULL)
     ORDER BY d.doc_id DESC;
   `;
 
@@ -293,7 +296,10 @@ export const countProcessingDocumentsByLawyer = async (lawyerId) => {
 // count of pending task documents where the doc_status is not "approved"
 export const countPendingTaskDocuments = async () => {
   const { rows } = await query(
-    `SELECT COUNT(*) FROM document_tbl WHERE doc_type = 'Task' AND doc_status != 'approved'`
+    `SELECT COUNT(*) FROM document_tbl d 
+     JOIN case_tbl c ON d.case_id = c.case_id
+     WHERE doc_type = 'Task' AND doc_status != 'approved'
+     AND (c.case_status NOT IN ('Archived (Completed)', 'Archived (Dismissed)', 'Completed', 'Dismissed') OR c.case_status IS NULL)`
   );
   return rows[0].count;
 };
@@ -312,7 +318,7 @@ export const countUserPendingTaskDocuments = async (userId) => {
         OR c.user_id = $1            -- tasks belonging to lawyer's cases
       )
       AND (d.doc_status IS NULL OR LOWER(d.doc_status) NOT IN ('approved', 'completed'))
-      AND (c.case_status NOT IN ('Archived (Completed)', 'Archived (Dismissed)', 'Deleted') OR c.case_status IS NULL)
+      AND (c.case_status NOT IN ('Archived (Completed)', 'Archived (Dismissed)', 'Completed', 'Dismissed') OR c.case_status IS NULL)
   `;
 
   const { rows } = await query(sql, [userId]);

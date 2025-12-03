@@ -46,22 +46,22 @@ app.use("/api", caseTagRoutes);
 app.use(
   "/uploads/taskedDocs",
   verifyUser, // only verified users can access tasked documents
-  express.static("D:/Capstone_ni_Angelie/uploads/taskedDocs")
+  express.static("C:/Users/Lenovo i5 8th Gen/Desktop/CAPSTONE_2/taskedDocs")
 );
 app.use(
   "/uploads/supportingDocs",
   verifyUser,
   requireAdminOrLawyer,
-  express.static("C:/CAPSTONE_2/uploads/supportingDocs")
+  express.static("C:/Users/Lenovo i5 8th Gen/Desktop/CAPSTONE_2/supportingDocs")
 ); // supporting document uploads (restricted)
 app.use(
   "/uploads/referenceDocs",
   verifyUser,
-  express.static("C:/CAPSTONE_2/uploads/referenceDocs")
+  express.static("C:/Users/Lenovo i5 8th Gen/Desktop/CAPSTONE_2/referenceDocs")
 );
 
 // Keep a generic uploads static for non-sensitive assets (e.g., profile images)
-app.use("/uploads", express.static("C:/CAPSTONE_2/uploads"));
+app.use("/uploads", express.static("C:/Users/Lenovo i5 8th Gen/Desktop/CAPSTONE_2/uploads"));
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`Listening on port ${port}`);

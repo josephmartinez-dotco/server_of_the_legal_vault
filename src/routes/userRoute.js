@@ -10,7 +10,7 @@ const router = express.Router();
 // Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "C:/CAPSTONE_2/uploads");
+    cb(null, "C:/Users/Lenovo i5 8th Gen/Desktop/CAPSTONE_2/uploads");
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);

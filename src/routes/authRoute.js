@@ -139,16 +139,16 @@ router.post("/verify-2fa", async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    // // For logging user login activity
-    //   await query(
-    //     `INSERT INTO user_log_tbl (user_log_action, user_log_type, user_ip_address, user_id, user_fullname, user_profile) VALUES ('Login', 'User Log', $1, $2, $3, $4)`,
-    //     [
-    //       req.ip,
-    //       user.user_id,
-    //       `${user.user_fname} ${user.user_mname} ${user.user_lname}`,
-    //       user.user_profile,
-    //     ]
-    //   );
+    // For logging user login activity
+    await query(
+      `INSERT INTO user_log_tbl (user_log_action, user_log_type, user_ip_address, user_id, user_fullname, user_profile) VALUES ('Login', 'User Log', $1, $2, $3, $4)`,
+      [
+        req.ip,
+        user.user_id,
+        `${user.user_fname} ${user.user_mname} ${user.user_lname}`,
+        user.user_profile,
+      ]
+    );
 
     delete user.user_password;
     res.json({ user });
